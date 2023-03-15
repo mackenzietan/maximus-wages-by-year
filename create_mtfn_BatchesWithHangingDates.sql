@@ -1,15 +1,13 @@
---function, check to see if the dates within a batch fall within the given year, if it does, add it, if it doesn't, calcualte what days do fall within the year
---pull pay batches for year 20xx
-    --case dates of batch between 010120xx and 123120xx, keep it
-    --case start date less than 010120xx, pull start date and calc days within 20xx
-    --case end date greater than 123120xx, pull end date and calc days within 20xx
+--create function mtfn_BatchesWithHangingDates
+--queries paybatchdefinition and utility calendar to pull dates within 20xx pay batches
+--  that "hang" over the 20xx work days dates (0101 and 1231)
 
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER FUNCTION [dbo].[mtfn_BatchesWithHangingDates] (
+CREATE FUNCTION [dbo].[mtfn_BatchesWithHangingDates] (
     @TargetYear int = NULL
 )
 RETURNS @BatchesWithHangingDates TABLE (
@@ -49,7 +47,7 @@ BEGIN
         JOIN dbo.UtilityCalendar AS uc ON (uc.UTDate between pbd.StartDate and pbd.EndDate)
         WHERE PayYear = @TargetYear         --selects any pay batch in 20xx...
             AND StartDate < @StartDateDT    -- where the start date is before 20xx-01-01
-            AND BatchNumber > 19999999
+            AND BatchNumber > 19999999      --only gives us batches/dates in the 20xxmmdd format
     END 
     BEGIN
         INSERT INTO @BatchesWithHangingDates --lists pay batches with hanging dates at the end of the year
@@ -65,7 +63,7 @@ BEGIN
         WHERE PayYear IN (@TargetYear,@TargetYear+1)    --selects any pay batch in 20xx and 20xx+1...
             AND EndDate > @EndDateDT                    -- where the end date is after 20xx/12/31...
             AND EndDate <= @EndDateDT2                  -- and before 20xx+1/01/14 <---if not, this will select all 20xx+1 batches
-            AND BatchNumber > 19999999
+            AND BatchNumber > 19999999                  --only gives us batches/dates in the 20xxmmdd format
     END 
 RETURN
 END

@@ -38,7 +38,7 @@ BEGIN
     FROM dbo.PayBatchDefinition
     WHERE StartDate > @StartDateDT
         AND EndDate < @EndDateDT
-        AND BatchNumber > 19999999 --pulls only pay batches with the 20xxmmyy format
+        AND BatchNumber > 19999999 --pulls only pay batches with the 20xxmmdd format
 
 
 RETURN

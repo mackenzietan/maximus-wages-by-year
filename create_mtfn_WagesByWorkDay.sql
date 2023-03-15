@@ -1,3 +1,8 @@
+--create function mtfn_WagesByWorkDay
+--queries employee, payroll, org, and glaccount tables to pull transaction amounts
+--  and glaccount codes.descriptions for all individuals within a given year
+--this query returns a significant amount of data
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

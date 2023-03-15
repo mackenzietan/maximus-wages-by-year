@@ -1,3 +1,8 @@
+--create stored procedure mtsp_Maximus
+--calls our created functions and further specifies the returned data based on
+--  the user's department and year specifications
+--should return a report that is appropriate to send to Maximus for their yearly request
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
