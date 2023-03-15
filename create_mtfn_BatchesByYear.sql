@@ -1,4 +1,5 @@
---function for pull pay batches
+--create function mtfn_BatchesByYear
+--queries PayBatchDefinition for pay batches within a given year specified by the function call
 
 SET ANSI_NULLS ON
 GO
@@ -21,6 +22,7 @@ BEGIN
     DECLARE @StartDateDT DATETIME
     DECLARE @EndDateDT DATETIME
 
+--convert and concatenate the function parameter to a usable datetime variable
     SET @StartDateVC = CONVERT(varchar(4), @SpecifiedYear) + '-01-01 00:00:00.000'
     SET @EndDateVC = CONVERT(varchar(4), @SpecifiedYear) + '-12-31 23:59:59.999'
 
@@ -36,7 +38,7 @@ BEGIN
     FROM dbo.PayBatchDefinition
     WHERE StartDate > @StartDateDT
         AND EndDate < @EndDateDT
-        AND BatchNumber > 9999
+        AND BatchNumber > 19999999 --pulls only pay batches with the 20xxmmyy format
 
 
 RETURN

@@ -1,4 +1,7 @@
-03/09/2023
-The files in this folder should be run in a specific order to correctly create and run the Wages report required by Maximus.
+03/15/2023
+> Adding this readme file to the repo
 
-We first want to run all the create function SQL files and then run the stored procedures to get the report.
+> The create function files here must be run prior to running the sproc
+> They may already be created, but may need created again if the nws
+>> system update cleared out any of my proprietary functions/sprocs
+
