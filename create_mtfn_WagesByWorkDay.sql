@@ -18,6 +18,7 @@ RETURNS @WagesByWorkDay TABLE (
     ,SeparateCheckID INT
     ,CheckStart DATETIME
     ,CheckEnd DATETIME
+    ,WorkDate DATETIME
     ,GLAccount VARCHAR(MAX)
     ,SumHoursWorked INT
     ,SumTransactionAmount INT
@@ -79,6 +80,7 @@ BEGIN
 	    ,SeparateCheckID
 	    ,MIN(WorkDate) AS CheckStart
 	    ,MAX(WorkDate) AS CheckEnd
+        ,WorkDate
 	    ,GLAccount
 	    ,SUM(HoursWorked) AS SumHoursWorked
 	    ,SUM(TransactionAmount) AS SumTransactionAmount
