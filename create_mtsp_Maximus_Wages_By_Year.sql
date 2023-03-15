@@ -62,20 +62,22 @@ CREATE TABLE #AllActiveEmployees (
                                     ,EmployeeJobTitle varchar(100)
 )
 
-CREATE TABLE #ParkPoliceEmployees (
-
-)
-
 CREATE TABLE #WagesByBatchWithGL (
 
 )
 
-CREATE TABLE #WagesByHangingDates (
+CREATE TABLE #WagesByHangingDatesPP (
+
+)
+
+CREATE TABLE #WagesByHangingDatesPW (
 
 )
 
 --step 2: call function to get whole batches by @year
-SELECT * INTO #BatchesInYear FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
+SELECT * 
+INTO #BatchesInYear 
+FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
 
 --step 3: take @ year and calculate partial batches and hanging dates
 SELECT * 
@@ -85,8 +87,25 @@ WHERE WorkDate >= @Jan1DT
     AND WorkDate <= @Dec31DT
 
 --step 4: get transaction amounts and gl accounts for the above batches and days
-SELECT * INTO #WagesByHangingDates FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) WHERE --department is park police or public works 
-                                                                                      --and work day is equal to all the hanging days from the previous step
+CASE
+WHEN @Department = 'Park Police' THEN
+    SELECT * 
+    INTO #WagesByHangingDatesPP 
+    FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) 
+    WHERE Department IN (
+        '2010 - Park Police'
+        ,'2011 - Park Police/WCCC'
+        ,'2013 - Park Police/Airport'
+    )
+WHEN @Department = 'Public Works' THEN
+    SELECT * 
+    INTO #WagesByHangingDatesPW
+    FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) 
+    WHERE Department = 'Public Works'
+END
+
+--department is park police or public works 
+--and work day is equal to all the hanging days from the previous step
 
 
 
