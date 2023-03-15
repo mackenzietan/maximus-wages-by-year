@@ -90,6 +90,7 @@ BEGIN
 		    ,PayBatchID
 		    ,SeparateCheckID
 		    ,GLAccount
+            ,WorkDate
     ORDER BY Department
 		    ,EmployeeNumber
 		    ,PayBatchID
