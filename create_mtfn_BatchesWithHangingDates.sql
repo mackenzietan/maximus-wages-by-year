@@ -28,15 +28,15 @@ BEGIN
     DECLARE @EndDateDT DATETIME
     DECLARE @EndDateDT2 DATETIME
 
-    SET @YearPlusOne = @TargetYear+1
+    SET @YearPlusOne = @TargetYear + 1
 
     SET @StartDateVC = CONVERT(VARCHAR(4), @TargetYear) + '-01-01 00:00:00.000'
     SET @EndDateVC = CONVERT(VARCHAR(4), @TargetYear) + '-12-31 23:59:59.999'
-    SET @EndDateVC2 = CONVERT(VARCHAR(4), @YearPlusOne) + '-01-14 00:00:00.000'
+    SET @EndDateVC2 = CONVERT(VARCHAR(4), @YearPlusOne) + '-01-15 00:00:00.000'
 
-    SET @StartDateDT = CONVERT(DATETIME, @StartDateVC)
-    SET @EndDateDT = CONVERT(DATETIME, @EndDateVC)
-    SET @EndDateDT2 = CONVERT(DATETIME, @EndDateVC2)
+    SET @StartDateDT = CONVERT(DATETIME, @StartDateVC)  --20xx-01-01 00:00:00.000'
+    SET @EndDateDT = CONVERT(DATETIME, @EndDateVC)      --20xx-12-31 23:59:59.999
+    SET @EndDateDT2 = CONVERT(DATETIME, @EndDateVC2)    --20xy-01-15 00:00:00.000
     BEGIN
         INSERT INTO @BatchesWithHangingDates --lists pay batches with hanging dates at the beginning of the year
         SELECT 
@@ -63,7 +63,7 @@ BEGIN
             ,uc.UTDate
         FROM dbo.PayBatchDefinition AS pbd
         JOIN dbo.UtilityCalendar AS uc ON (uc.UTDate BETWEEN pbd.StartDate AND pbd.EndDate)
-        WHERE PayYear IN (@TargetYear,@YearPlusOne)     --selects any pay batch in 20xx and 20xx+1...
+        WHERE PayYear IN (@YearPlusOne)     --selects any pay batch in 20xx and 20xx+1...
             AND EndDate > @EndDateDT                    -- where the end date is after 20xx/12/31...
             AND EndDate <= @EndDateDT2                  -- and before 20xx+1/01/14 <---if not, this will select all 20xx+1 batches
             AND BatchNumber > 19999999                  --only gives us batches/dates in the 20xxmmdd format
