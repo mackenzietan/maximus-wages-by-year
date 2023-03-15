@@ -25,6 +25,17 @@ BEGIN TRY
 DECLARE @CurrentDate DATETIME
 SELECT @CurrentDate = GETDATE()
 
+DECLARE @Jan1VC VARCHAR(30)
+DECLARE @Dec31VC VARCHAR(30)
+DECLARE @Jan1DT DATETIME
+DECLARE @Dec31DT DATETIME
+
+SET @Jan1VC = CONVERT(VARCHAR(4),@SpecifiedYear) + '-01-01 00:00:00.000'
+SET @Jan1DT = CONVERT(DATETIME, @Jan1VC)
+
+SET @Dec31VC = CONVERT(VARCHAR(4),@SpecifiedYear) + '-12-31 23:59:59.999'
+SET @Dec31DT = CONVERT(DATETIME, @Dec31VC)
+
 CREATE TABLE #BatchesInYear (
                                 PayBatchID INT PRIMARY KEY
                                 ,BatchNumber INT
@@ -67,7 +78,11 @@ CREATE TABLE #WagesByHangingDates (
 SELECT * INTO #BatchesInYear FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
 
 --step 3: take @ year and calculate partial batches and hanging dates
-SELECT * INTO #HangingDates FROM dbo.mtfn_BatchesWithHangingDates(@SpecifiedYear)
+SELECT * 
+INTO #HangingDates 
+FROM dbo.mtfn_BatchesWithHangingDates(@SpecifiedYear)
+WHERE WorkDate >= @Jan1DT
+    AND WorkDate <= @Dec31DT
 
 --step 4: get transaction amounts and gl accounts for the above batches and days
 SELECT * INTO #WagesByHangingDates FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) WHERE --department is park police or public works 
