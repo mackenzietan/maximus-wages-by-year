@@ -11,7 +11,7 @@ CREATE FUNCTION [dbo].[mtfn_BatchesWithHangingDates] (
     @TargetYear INT = NULL
 )
 RETURNS @BatchesWithHangingDates TABLE (
-    PayBatchID INT PRIMARY KEY
+    PayBatchID INT
     ,BatchNumber INT
     ,PayYear INT
     ,StartDate DATETIME
@@ -63,7 +63,7 @@ BEGIN
             ,uc.UTDate
         FROM dbo.PayBatchDefinition AS pbd
         JOIN dbo.UtilityCalendar AS uc ON (uc.UTDate BETWEEN pbd.StartDate AND pbd.EndDate)
-        WHERE PayYear IN (@YearPlusOne)     --selects any pay batch in 20xx and 20xx+1...
+        WHERE PayYear IN (@TargetYear, @YearPlusOne)     --selects any pay batch in 20xx and 20xx+1...
             AND EndDate > @EndDateDT                    -- where the end date is after 20xx/12/31...
             AND EndDate <= @EndDateDT2                  -- and before 20xx+1/01/14 <---if not, this will select all 20xx+1 batches
             AND BatchNumber > 19999999                  --only gives us batches/dates in the 20xxmmdd format
