@@ -25,6 +25,11 @@ BEGIN TRY
 DECLARE @CurrentDate DATETIME
 SELECT @CurrentDate = GETDATE()
 
+    --With the following lines we are taking the input
+    --from the sproc call (which was specified as INT) and
+    --converting that to VARCHAR so that is can be 
+    --concatenated and converted to DATETIME to be used
+    --later.
 DECLARE @Jan1VC VARCHAR(30)
 DECLARE @Dec31VC VARCHAR(30)
 DECLARE @Jan1DT DATETIME
@@ -79,7 +84,7 @@ SELECT *
 INTO #BatchesInYear 
 FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
 
---step 3: take @ year and calculate partial batches and hanging dates
+--step 3: take @year and calculate partial batches and hanging dates
 SELECT * 
 INTO #HangingDates 
 FROM dbo.mtfn_BatchesWithHangingDates(@SpecifiedYear)
