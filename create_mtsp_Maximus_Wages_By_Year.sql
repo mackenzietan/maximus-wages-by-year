@@ -8,7 +8,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE mtsp_Maximus @Department VARCHAR(30), @SpecifiedYear INT
+CREATE PROCEDURE mtsp_Maximus @Department VARCHAR(30), @SpecifiedYear VARCHAR(4)
 
 AS
 SET NOCOUNT ON 
@@ -25,21 +25,16 @@ BEGIN TRY
 DECLARE @CurrentDate DATETIME
 SELECT @CurrentDate = GETDATE()
 
-    --With the following lines we are taking the input
-    --from the sproc call (which was specified as INT) and
-    --converting that to VARCHAR so that is can be 
-    --concatenated and converted to DATETIME to be used
-    --later.
-DECLARE @Jan1VC VARCHAR(30)
-DECLARE @Dec31VC VARCHAR(30)
+DECLARE @Jan1Long VARCHAR(30)
+DECLARE @Dec31Long VARCHAR(30)
 DECLARE @Jan1DT DATETIME
 DECLARE @Dec31DT DATETIME
 
-SET @Jan1VC = CONVERT(VARCHAR(4),@SpecifiedYear) + '-01-01 00:00:00.000'
-SET @Jan1DT = CONVERT(DATETIME, @Jan1VC)
+SET @Jan1Long = @SpecifiedYear + '-01-01 00:00:00.000'
+SET @Jan1DT = CONVERT(DATETIME, @Jan1Long)
 
-SET @Dec31VC = CONVERT(VARCHAR(4),@SpecifiedYear) + '-12-31 23:59:59.999'
-SET @Dec31DT = CONVERT(DATETIME, @Dec31VC)
+SET @Dec31Long = @SpecifiedYear + '-12-31 23:59:59.999'
+SET @Dec31DT = CONVERT(DATETIME, @Dec31Long)
 
 CREATE TABLE #BatchesInYear (
                                 PayBatchID INT PRIMARY KEY
