@@ -38,9 +38,13 @@ INSERT INTO @WagesByBatch
         vei.DepartmentId
         ,vei.EmployeeNumber
         ,pj.PayBatchID
-        
+        --separatecheckid
+        --checkstart
+        --checkend
+        --workdate
         ,CONCAT(gla.GLAccountDelimiter,' ',gla.GLAccountDescription) AS 'GLAccount'
-        
+        --sumhours worked
+        --
         ,vei.EmployeeName
         ,pj.TransactionAmount
         ,pj.PayrollTypeID
