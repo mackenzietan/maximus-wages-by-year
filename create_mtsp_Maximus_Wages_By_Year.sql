@@ -22,19 +22,23 @@ SET NUMERIC_ROUNDABORT OFF
 
 BEGIN TRY
 --step 1: Declare vars and tables
+    --current date
 DECLARE @CurrentDate DATETIME
 SELECT @CurrentDate = GETDATE()
 
+    --date conversions
 DECLARE @Jan1Long VARCHAR(30)
 DECLARE @Dec31Long VARCHAR(30)
 DECLARE @Jan1DT DATETIME
 DECLARE @Dec31DT DATETIME
-
 SET @Jan1Long = @SpecifiedYear + '-01-01 00:00:00.000'
 SET @Jan1DT = CONVERT(DATETIME, @Jan1Long)
-
 SET @Dec31Long = @SpecifiedYear + '-12-31 23:59:59.999'
 SET @Dec31DT = CONVERT(DATETIME, @Dec31Long)
+
+    --hanging dates list
+DECLARE @HangingDates VARCHAR(MAX)
+
 
 CREATE TABLE #BatchesInYear (
                                 PayBatchID INT PRIMARY KEY
@@ -50,6 +54,10 @@ CREATE TABLE #HangingDates (
                                 ,StartDate DATETIME
                                 ,EndDate DATETIME
                                 ,WorkDate DATETIME
+)
+
+CREATE TABLE #HangingDatesWorkDateOnly (
+                                WorkDate DATETIME
 )
 
 CREATE TABLE #AllActiveEmployees (
@@ -92,6 +100,13 @@ WHERE WorkDate >= @Jan1DT
     AND WorkDate <= @Dec31DT
 
 --step 4: get transaction amounts and gl accounts for the above batches and days
+    --convert workdate col from #hangingdates into its own single-column table
+SELECT WorkDate 
+INTO #HangingDatesWorkDateOnly
+FROM #HangingDates
+    SELECT @HangingDates = COALESCE(@HangingDates + ',','') 
+    FROM #HangingDatesWorkDateOnly
+
 SELECT * 
 INTO #WagesByHangingDates 
 FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) 
@@ -100,16 +115,13 @@ WHERE Department IN (
     ,'2011 - Park Police/WCCC'
     ,'2013 - Park Police/Airport'
 )
-END
-
+    AND WorkDate IN (@HangingDates)
 
 --and work day is equal to all the hanging days from the previous step
 
 
---end try
 END TRY
 
---catch
 BEGIN CATCH
 
 END CATCH
