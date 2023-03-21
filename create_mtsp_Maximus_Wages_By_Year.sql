@@ -69,12 +69,21 @@ CREATE TABLE #AllActiveEmployees (
                                     ,EmployeeJobID int
                                     ,EmployeeJobTitle varchar(100)
 )
-/* can't remember what this is for
-CREATE TABLE #WagesByBatchWithGL (
 
-)
-*/
 CREATE TABLE #WagesByHangingDates (
+                                    Department VARCHAR(MAX)
+                                    ,EmployeeNumber INT
+                                    ,PayBatchID INT
+                                    ,SeparateCheckID INT
+                                    ,CheckStart DATETIME
+                                    ,CheckEnd DATETIME
+                                    ,WorkDate DATETIME
+                                    ,GLAccount VARCHAR(MAX)
+                                    ,SumHoursWorked INT
+                                    ,SumTransactionAmount INT
+)
+
+CREATE TABLE #WagesByBatchWithGL (
                                     Department VARCHAR(MAX)
                                     ,EmployeeNumber INT
                                     ,PayBatchID INT
@@ -100,6 +109,7 @@ WHERE WorkDate >= @Jan1DT
     AND WorkDate <= @Dec31DT
 
 --step 4: get transaction amounts and gl accounts for the above batches and days
+--step 4.1 - by workdate (hanging dates)
     --convert workdate col from #hangingdates into its own single-column table
 SELECT WorkDate 
 INTO #HangingDatesWorkDateOnly
@@ -115,9 +125,15 @@ WHERE Department IN (
     ,'2011 - Park Police/WCCC'
     ,'2013 - Park Police/Airport'
 )
-    AND WorkDate IN (@HangingDates)
+    AND WorkDate IN (@HangingDates) --and work day is equal to all the hanging days from the previous step
 
---and work day is equal to all the hanging days from the previous step
+--step 4.2 - by batch
+--we want to call a function that will return the same columns as #WagesByHangingDates but for the batch numbers in #BatchesInYear
+--same coalesce statement as above?
+
+SELECT *
+INTO #WagesByBatchWithGL
+FROM dbo.mtfn_WagesByBatch()
 
 
 END TRY
