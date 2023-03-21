@@ -33,64 +33,36 @@ BEGIN
     SET @Dec31Long = @Year + '-12-31 23:59:59.999'
     SET @Dec31DT = CONVERT(DATETIME, @Dec31Long)
 
-    DECLARE @EmployeeHours TABLE (
-                                    Department VARCHAR(MAX)
-                                    ,EmployeeNumber INT
-                                    ,PayBatchID INT
-                                    ,SeparateCheckID INT
-                                    ,WorkDate DATETIME
-                                    ,HoursWorked INT
-                                    ,GLAccount VARCHAR(MAX)
-                                    ,GLAccountID INT
-                                    ,TransactionAmount INT
-
-    )
-
-    INSERT INTO @EmployeeHours
+INSERT INTO @WagesByBatch
     SELECT 
-        CONCAT(og.OrgGroupCode,' - ',og.OrgGroupCodeDesc) AS 'Department'
-        ,e.EmployeeNumber
-        ,pjed.PayBatchID
-        ,pjed.SeparateCheckID
-        ,ph.WorkDate
-        ,ph.HoursWorked
-        ,CONCAT(gla.Org1Code,'.',gla.Org2Code,'.',a.AccountCode,' - ',a.AccountDescription) AS 'GLAccount'
-        ,pjed.GLAccountID
-        ,pjed.TransactionAmount
-    FROM HR.PayrollJournal_EarningDetail AS pjed
-        INNER JOIN dbo.PayrollHours   AS ph   ON ph.PayrollHoursID=pjed.PayrollID
-        INNER JOIN dbo.OrgStructure   AS os   ON os.OrgStructureID=ph.OrgStructureID
-        INNER JOIN dbo.OrgGroup       AS og   ON og.OrgGroupID=os.Level1ID
-        INNER JOIN HR.Employee        AS e    ON e.EmployeeId=pjed.EmployeeID
-        INNER JOIN dbo.GLAccount      AS gla  ON gla.GLAccountID=pjed.GLAccountID
-        INNER JOIN dbo.Account        AS a    ON a.AccountID=gla.AccountID
-    WHERE ph.VoidedFlag = 'False'
-        AND ph.WorkDate BETWEEN @Jan1DT AND @Dec31DT
-    ORDER BY pjed.PayBatchID
-
-    INSERT INTO @WagesByBatch
-    SELECT 
-        Department
-	    ,EmployeeNumber
-	    ,PayBatchID
-	    ,SeparateCheckID
-	    ,MIN(WorkDate) AS CheckStart
-	    ,MAX(WorkDate) AS CheckEnd
-        ,WorkDate
-	    ,GLAccount
-	    ,SUM(HoursWorked) AS SumHoursWorked
-	    ,SUM(TransactionAmount) AS SumTransactionAmount
-    FROM @EmployeeHours
-    GROUP BY Department
-		    ,EmployeeNumber
-		    ,PayBatchID
-		    ,SeparateCheckID
-		    ,GLAccount
-            ,WorkDate
-    ORDER BY Department
-		    ,EmployeeNumber
-		    ,PayBatchID
-		    ,GLAccount
+        vei.DepartmentId
+        ,vei.EmployeeNumber
+        ,pj.PayBatchID
+        
+        ,CONCAT(gla.GLAccountDelimiter,' ',gla.GLAccountDescription) AS 'GLAccount'
+        
+        ,vei.EmployeeName
+        ,pj.TransactionAmount
+        ,pj.PayrollTypeID
+        ,pbd.BatchNumber
+        
+        ,pj.GLAccountID
+    FROM NWSLogosLive.dbo.PayrollJournal 
+        AS pj
+    JOIN NWSLogosLive.dbo.fn_GLAccountWithDescription (NULL, NULL, NULL) --pull function for GL Account info
+        AS gla 
+        ON pj.GLAccountID = gla.GLAccountID
+    JOIN NWSLogosLive.HR.vwEmployeeInformation --pull for Employee Name info
+        AS vei 
+        ON vei.EmployeeId = pj.EmployeeID
+    JOIN dbo.PayBatchDefinition
+        AS pbd
+        ON pbd.PayBatchID = pj.PayBatchID
+    WHERE pj.PayBatchID = @Year --specify pay batches within target year
+        AND pj.OrgSetID IN (102,157,158,164,176,177,494) --specify organization set ids for target departments, see info above
+        AND pj.PayrollTypeID = 1 --type 1 is wages
+        AND vei.DepartmentId = 104 --this only gives us current department ids, so anyone who changed departments since then will not show in the pay batch by department
+    ORDER BY vei.EmployeeName DESC
 
 RETURN
 END
