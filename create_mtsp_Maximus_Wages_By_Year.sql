@@ -1,4 +1,4 @@
---create stored procedure mtsp_Maximus
+--create stored procedure mtsp_Maximus_ParkPolice
 --calls our created functions and further specifies the returned data based on
 --  the user's department and year specifications
 --should return a report that is appropriate to send to Maximus for their yearly request
@@ -8,7 +8,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE mtsp_Maximus @Department VARCHAR(30), @SpecifiedYear VARCHAR(4)
+CREATE PROCEDURE mtsp_Maximus_ParkPolice @SpecifiedYear VARCHAR(4)
 
 AS
 SET NOCOUNT ON 
@@ -61,17 +61,22 @@ CREATE TABLE #AllActiveEmployees (
                                     ,EmployeeJobID int
                                     ,EmployeeJobTitle varchar(100)
 )
-
+/* can't remember what this is for
 CREATE TABLE #WagesByBatchWithGL (
 
 )
-
-CREATE TABLE #WagesByHangingDatesPP (
-
-)
-
-CREATE TABLE #WagesByHangingDatesPW (
-
+*/
+CREATE TABLE #WagesByHangingDates (
+                                    Department VARCHAR(MAX)
+                                    ,EmployeeNumber INT
+                                    ,PayBatchID INT
+                                    ,SeparateCheckID INT
+                                    ,CheckStart DATETIME
+                                    ,CheckEnd DATETIME
+                                    ,WorkDate DATETIME
+                                    ,GLAccount VARCHAR(MAX)
+                                    ,SumHoursWorked INT
+                                    ,SumTransactionAmount INT
 )
 
 --step 2: call function to get whole batches by @year
@@ -87,27 +92,18 @@ WHERE WorkDate >= @Jan1DT
     AND WorkDate <= @Dec31DT
 
 --step 4: get transaction amounts and gl accounts for the above batches and days
-CASE
-WHEN @Department = 'Park Police' THEN
-    SELECT * 
-    INTO #WagesByHangingDatesPP 
-    FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) 
-    WHERE Department IN (
-        '2010 - Park Police'
-        ,'2011 - Park Police/WCCC'
-        ,'2013 - Park Police/Airport'
-    )
-WHEN @Department = 'Public Works' THEN
-    SELECT * 
-    INTO #WagesByHangingDatesPW
-    FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) 
-    WHERE Department = 'Public Works'
+SELECT * 
+INTO #WagesByHangingDates 
+FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) 
+WHERE Department IN (
+    '2010 - Park Police'
+    ,'2011 - Park Police/WCCC'
+    ,'2013 - Park Police/Airport'
+)
 END
 
---department is park police or public works 
+
 --and work day is equal to all the hanging days from the previous step
-
-
 
 
 --end try
