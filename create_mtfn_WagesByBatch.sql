@@ -35,6 +35,17 @@ BEGIN
 
 INSERT INTO @WagesByBatch
     SELECT 
+    /*
+    concat(gla.GLAccountDelimiter,' ',gla.GLAccountDescription) as 'Account'
+    ,vei.EmployeeNumber
+    ,vei.EmployeeName
+    ,pj.TransactionAmount
+    ,pj.PayrollTypeID
+    ,pbd.BatchNumber
+    ,pj.PayBatchID
+    ,pj.GLAccountID
+    ,vei.DepartmentId
+    */
         vei.DepartmentId
         ,vei.EmployeeNumber
         ,pj.PayBatchID
