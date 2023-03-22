@@ -114,8 +114,8 @@ FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
 INSERT INTO #HangingDates 
 SELECT * 
 FROM dbo.mtfn_BatchesWithHangingDates(@SpecifiedYear)
-WHERE WorkDate >= @Jan1DT
-    AND WorkDate <= @Dec31DT
+/* WHERE WorkDate >= @Jan1DT
+    AND WorkDate <= @Dec31DT */
 
 --step 4: get transaction amounts and gl accounts for the above batches and days
     --step 4.1 - by workdate (hanging dates)
