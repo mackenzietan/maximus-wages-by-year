@@ -6,11 +6,11 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE FUNCTION [dbo].[mtfn_BatchesByYear] (
+ALTER FUNCTION [dbo].[mtfn_BatchesByYear] (
     @SpecifiedYear varchar(4) = NULL
 )
 RETURNS @BatchesInYear TABLE (
-    PayBatchID INT PRIMARY KEY
+    PayBatchID INT
     ,BatchNumber INT
     ,StartDate DATETIME
     ,EndDate DATETIME
