@@ -43,7 +43,7 @@ DECLARE @Batches VARCHAR(MAX)
 
     --Tables
 CREATE TABLE #BatchesInYear (
-                                PayBatchID INT
+                                PayBatchID INT PRIMARY KEY
                                 ,BatchNumber INT
                                 ,StartDate DATETIME
                                 ,EndDate DATETIME
@@ -100,6 +100,7 @@ CREATE TABLE #WagesByBatchWithGL (
                                     ,PayBatchID INT
                                     ,GLAccountID INT
                                     ,DepartmentId INT
+                                    ,Department VARCHAR(MAX)
                                     ,StartDate DATETIME
                                     ,EndDate DATETIME
 )

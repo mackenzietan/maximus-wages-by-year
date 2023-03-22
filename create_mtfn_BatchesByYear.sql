@@ -10,7 +10,7 @@ ALTER FUNCTION [dbo].[mtfn_BatchesByYear] (
     @SpecifiedYear varchar(4) = NULL
 )
 RETURNS @BatchesInYear TABLE (
-    PayBatchID INT
+    PayBatchID INT PRIMARY KEY
     ,BatchNumber INT
     ,StartDate DATETIME
     ,EndDate DATETIME
