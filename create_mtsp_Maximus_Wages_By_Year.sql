@@ -8,7 +8,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE mtsp_Maximus_ParkPolice @SpecifiedYear VARCHAR(4)
+ALTER PROCEDURE mtsp_Maximus_ParkPolice @SpecifiedYear VARCHAR(4)
 
 AS
 SET NOCOUNT ON 
