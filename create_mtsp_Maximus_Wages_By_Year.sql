@@ -43,14 +43,14 @@ DECLARE @Batches VARCHAR(MAX)
 
     --Tables
 CREATE TABLE #BatchesInYear (
-                                PayBatchID INT PRIMARY KEY
+                                PayBatchID INT
                                 ,BatchNumber INT
                                 ,StartDate DATETIME
                                 ,EndDate DATETIME
 )
 
 CREATE TABLE #HangingDates (
-                                PayBatchID INT PRIMARY KEY
+                                PayBatchID INT
                                 ,BatchNumber INT
                                 ,PayYear INT
                                 ,StartDate DATETIME
@@ -63,7 +63,7 @@ CREATE TABLE #HangingDatesWorkDateOnly (
 )
 
 CREATE TABLE #AllActiveEmployees (
-                                    EmployeeID INT PRIMARY KEY
+                                    EmployeeID INT
                                     ,EmployeeNumber INT
                                     ,EmployeeFullName VARCHAR(100)
                                     ,EmploymentStatus VARCHAR(10)
