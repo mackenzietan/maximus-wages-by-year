@@ -39,6 +39,9 @@ SET @Dec31DT = CONVERT(DATETIME, @Dec31Long)
     --hanging dates list
 DECLARE @HangingDates VARCHAR(MAX)
 
+    --batches list
+DECLARE @Batches VARCHAR(MAX)
+
 
 CREATE TABLE #BatchesInYear (
                                 PayBatchID INT PRIMARY KEY
@@ -83,17 +86,20 @@ CREATE TABLE #WagesByHangingDates (
                                     ,SumTransactionAmount INT
 )
 
+CREATE TABLE #BatchesOnly (
+                                PayBatchID INT
+)
+
 CREATE TABLE #WagesByBatchWithGL (
-                                    Department VARCHAR(MAX)
+                                    Account VARCHAR(MAX)
                                     ,EmployeeNumber INT
+                                    ,EmployeeName VARCHAR(60)
+                                    ,TransactionAmount INT
+                                    ,PayrollTypeID INT
+                                    ,BatchNumber INT
                                     ,PayBatchID INT
-                                    ,SeparateCheckID INT
-                                    ,CheckStart DATETIME
-                                    ,CheckEnd DATETIME
-                                    ,WorkDate DATETIME
-                                    ,GLAccount VARCHAR(MAX)
-                                    ,SumHoursWorked INT
-                                    ,SumTransactionAmount INT
+                                    ,GLAccountID INT
+                                    ,DepartmentId INT
 )
 
 --step 2: call function to get whole batches by @year
@@ -130,11 +136,21 @@ WHERE Department IN (
 --step 4.2 - by batch
 --we want to call a function that will return the same columns as #WagesByHangingDates but for the batch numbers in #BatchesInYear
 --same coalesce statement as above?
+SELECT PayBatchID 
+INTO #BatchesOnly
+FROM #BatchesInYear
+    SELECT @Batches = COALESCE(@Batches + ',','')
+    FROM #BatchesOnly
 
 SELECT *
 INTO #WagesByBatchWithGL
-FROM dbo.mtfn_WagesByBatch()
-
+FROM dbo.mtfn_WagesByBatch(@SpecifiedYear)
+    WHERE Department IN (
+        '2010 - Park Police'
+        ,'2011 - Park Police/WCCC'
+        ,'2013 - Park Police/Airport'
+    )
+        AND PayBatchID IN (@Batches)
 
 END TRY
 

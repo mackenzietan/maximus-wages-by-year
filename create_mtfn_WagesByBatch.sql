@@ -35,33 +35,15 @@ BEGIN
 
 INSERT INTO @WagesByBatch
     SELECT 
-    /*
-    concat(gla.GLAccountDelimiter,' ',gla.GLAccountDescription) as 'Account'
-    ,vei.EmployeeNumber
-    ,vei.EmployeeName
-    ,pj.TransactionAmount
-    ,pj.PayrollTypeID
-    ,pbd.BatchNumber
-    ,pj.PayBatchID
-    ,pj.GLAccountID
-    ,vei.DepartmentId
-    */
-        vei.DepartmentId
+        concat(gla.GLAccountDelimiter,' ',gla.GLAccountDescription) as 'Account'
         ,vei.EmployeeNumber
-        ,pj.PayBatchID
-        --separatecheckid
-        --checkstart
-        --checkend
-        --workdate
-        ,CONCAT(gla.GLAccountDelimiter,' ',gla.GLAccountDescription) AS 'GLAccount'
-        --sumhours worked
-        --
         ,vei.EmployeeName
         ,pj.TransactionAmount
         ,pj.PayrollTypeID
         ,pbd.BatchNumber
-        
+        ,pj.PayBatchID
         ,pj.GLAccountID
+        ,vei.DepartmentId
     FROM NWSLogosLive.dbo.PayrollJournal 
         AS pj
     JOIN NWSLogosLive.dbo.fn_GLAccountWithDescription (NULL, NULL, NULL) --pull function for GL Account info
