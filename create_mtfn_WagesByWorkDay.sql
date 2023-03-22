@@ -14,6 +14,7 @@ CREATE FUNCTION [dbo].[mtfn_WagesByWorkDay] (
 RETURNS @WagesByWorkDay TABLE (
     Department VARCHAR(MAX)
     ,EmployeeNumber INT
+    ,EmployeeName VARCHAR(MAX)
     ,PayBatchID INT
     ,SeparateCheckID INT
     ,CheckStart DATETIME
@@ -40,6 +41,7 @@ BEGIN
     DECLARE @EmployeeHours TABLE (
                                     Department VARCHAR(MAX)
                                     ,EmployeeNumber INT
+                                    ,EmployeeName VARCHAR(MAX)
                                     ,PayBatchID INT
                                     ,SeparateCheckID INT
                                     ,WorkDate DATETIME
@@ -54,6 +56,7 @@ BEGIN
     SELECT 
         CONCAT(og.OrgGroupCode,' - ',og.OrgGroupCodeDesc) AS 'Department'
         ,e.EmployeeNumber
+        ,CONCAT(en.LastName,', ',en.FirstName,' ',en.MiddleName) AS 'EmployeeName'
         ,pjed.PayBatchID
         ,pjed.SeparateCheckID
         ,ph.WorkDate
@@ -68,6 +71,7 @@ BEGIN
         INNER JOIN HR.Employee        AS e    ON e.EmployeeId=pjed.EmployeeID
         INNER JOIN dbo.GLAccount      AS gla  ON gla.GLAccountID=pjed.GLAccountID
         INNER JOIN dbo.Account        AS a    ON a.AccountID=gla.AccountID
+        INNER JOIN HR.EmployeeName    AS en   ON en.EmployeeId=e.EmployeeId
     WHERE ph.VoidedFlag = 'False'
         AND ph.WorkDate BETWEEN @Jan1DT AND @Dec31DT
     ORDER BY ph.WorkDate
@@ -76,6 +80,7 @@ BEGIN
     SELECT 
         Department
 	    ,EmployeeNumber
+        ,EmployeeName
 	    ,PayBatchID
 	    ,SeparateCheckID
 	    ,MIN(WorkDate) AS CheckStart
@@ -87,6 +92,7 @@ BEGIN
     FROM @EmployeeHours
     GROUP BY Department
 		    ,EmployeeNumber
+            ,EmployeeName
 		    ,PayBatchID
 		    ,SeparateCheckID
 		    ,GLAccount

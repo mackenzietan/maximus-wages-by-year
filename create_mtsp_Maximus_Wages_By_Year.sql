@@ -19,8 +19,7 @@ SET CONCAT_NULL_YIELDS_NULL ON
 SET QUOTED_IDENTIFIER ON
 SET NUMERIC_ROUNDABORT OFF 
 
-
-BEGIN TRY
+BEGIN
 --step 1: Declare vars and tables
     --current date
 DECLARE @CurrentDate DATETIME
@@ -42,7 +41,7 @@ DECLARE @HangingDates VARCHAR(MAX)
     --batches list
 DECLARE @Batches VARCHAR(MAX)
 
-
+    --Tables
 CREATE TABLE #BatchesInYear (
                                 PayBatchID INT PRIMARY KEY
                                 ,BatchNumber INT
@@ -60,7 +59,7 @@ CREATE TABLE #HangingDates (
 )
 
 CREATE TABLE #HangingDatesWorkDateOnly (
-                                WorkDate DATETIME
+                                        WorkDate DATETIME
 )
 
 CREATE TABLE #AllActiveEmployees (
@@ -76,6 +75,7 @@ CREATE TABLE #AllActiveEmployees (
 CREATE TABLE #WagesByHangingDates (
                                     Department VARCHAR(MAX)
                                     ,EmployeeNumber INT
+                                    ,EmployeeName VARCHAR(MAX)
                                     ,PayBatchID INT
                                     ,SeparateCheckID INT
                                     ,CheckStart DATETIME
@@ -87,73 +87,92 @@ CREATE TABLE #WagesByHangingDates (
 )
 
 CREATE TABLE #BatchesOnly (
-                                PayBatchID INT
+                            PayBatchID INT
 )
 
 CREATE TABLE #WagesByBatchWithGL (
                                     Account VARCHAR(MAX)
                                     ,EmployeeNumber INT
-                                    ,EmployeeName VARCHAR(60)
+                                    ,EmployeeName VARCHAR(MAX)
                                     ,TransactionAmount INT
                                     ,PayrollTypeID INT
                                     ,BatchNumber INT
                                     ,PayBatchID INT
                                     ,GLAccountID INT
                                     ,DepartmentId INT
+                                    ,StartDate DATETIME
+                                    ,EndDate DATETIME
 )
 
 --step 2: call function to get whole batches by @year
+INSERT INTO #BatchesInYear 
 SELECT * 
-INTO #BatchesInYear 
 FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
 
 --step 3: take @year and calculate partial batches and hanging dates
+INSERT INTO #HangingDates 
 SELECT * 
-INTO #HangingDates 
 FROM dbo.mtfn_BatchesWithHangingDates(@SpecifiedYear)
 WHERE WorkDate >= @Jan1DT
     AND WorkDate <= @Dec31DT
 
 --step 4: get transaction amounts and gl accounts for the above batches and days
---step 4.1 - by workdate (hanging dates)
+    --step 4.1 - by workdate (hanging dates)
     --convert workdate col from #hangingdates into its own single-column table
+INSERT INTO #HangingDatesWorkDateOnly
 SELECT WorkDate 
-INTO #HangingDatesWorkDateOnly
 FROM #HangingDates
-    SELECT @HangingDates = COALESCE(@HangingDates + ',','') 
-    FROM #HangingDatesWorkDateOnly
+    SET @HangingDates = (
+                        SELECT COALESCE(@HangingDates + ',','') 
+                        FROM #HangingDatesWorkDateOnly
+                        )
 
+INSERT INTO #WagesByHangingDates 
 SELECT * 
-INTO #WagesByHangingDates 
 FROM dbo.mtfn_WagesByWorkDay(@SpecifiedYear) 
 WHERE Department IN (
     '2010 - Park Police'
     ,'2011 - Park Police/WCCC'
     ,'2013 - Park Police/Airport'
-)
+    )
     AND WorkDate IN (@HangingDates) --and work day is equal to all the hanging days from the previous step
 
---step 4.2 - by batch
---we want to call a function that will return the same columns as #WagesByHangingDates but for the batch numbers in #BatchesInYear
---same coalesce statement as above?
+    --step 4.2 - by batch
+INSERT INTO #BatchesOnly
 SELECT PayBatchID 
-INTO #BatchesOnly
 FROM #BatchesInYear
-    SELECT @Batches = COALESCE(@Batches + ',','')
-    FROM #BatchesOnly
+    SET @Batches = (
+                    SELECT COALESCE(@Batches + ',','')
+                    FROM #BatchesOnly
+                   )
 
+INSERT INTO #WagesByBatchWithGL
 SELECT *
-INTO #WagesByBatchWithGL
 FROM dbo.mtfn_WagesByBatch(@SpecifiedYear)
-    WHERE Department IN (
-        '2010 - Park Police'
-        ,'2011 - Park Police/WCCC'
-        ,'2013 - Park Police/Airport'
+WHERE Department IN (
+    '2010 - Park Police'
+    ,'2011 - Park Police/WCCC'
+    ,'2013 - Park Police/Airport'
     )
-        AND PayBatchID IN (@Batches)
+    AND PayBatchID IN (@Batches)
 
-END TRY
+--creating the final report
+SELECT 
+    GLAccount AS Account
+    ,EmployeeNumber
+    ,EmployeeName
+    ,SumTransactionAmount AS Wages
+    ,CONCAT(CheckStart,' - ',CheckEnd) AS PayPeriod
+FROM #WagesByHangingDates
+UNION ALL
+SELECT
+    Account
+    ,EmployeeNumber
+    ,EmployeeName 
+    ,TransactionAmount AS Wages
+    ,CONCAT(StartDate,' - ',EndDate) AS PayPeriod
+FROM #WagesByBatchWithGL
 
-BEGIN CATCH
+END
 
-END CATCH
+GO
