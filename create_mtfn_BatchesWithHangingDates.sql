@@ -37,6 +37,7 @@ BEGIN
     SET @StartDateDT = CONVERT(DATETIME, @StartDateVC)  --20xx-01-01 00:00:00.000'
     SET @EndDateDT = CONVERT(DATETIME, @EndDateVC)      --20xx-12-31 23:59:59.999
     SET @EndDateDT2 = CONVERT(DATETIME, @EndDateVC2)    --20xy-01-15 00:00:00.000
+
     BEGIN
         INSERT INTO @BatchesWithHangingDates --lists pay batches with hanging dates at the beginning of the year
         SELECT 
