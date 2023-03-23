@@ -112,7 +112,8 @@ FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
 
 --step 3: take @year and calculate partial batches and hanging dates
 INSERT INTO #HangingDates 
-SELECT *
+SELECT 
+    PayBatchID
 FROM dbo.mtfn_BatchesWithHangingDates(@SpecifiedYear)
     WHERE WorkDate >= @Jan1DT
     AND WorkDate <= @Dec31DT
