@@ -51,10 +51,6 @@ CREATE TABLE #BatchesInYear (
 
 CREATE TABLE #HangingDates (
                                 PayBatchID INT
-                                ,BatchNumber INT
-                                ,PayYear INT
-                                ,StartDate DATETIME
-                                ,EndDate DATETIME
                                 ,WorkDate DATETIME
 )
 
@@ -114,6 +110,7 @@ FROM dbo.mtfn_BatchesByYear(@SpecifiedYear)
 INSERT INTO #HangingDates 
 SELECT 
     PayBatchID
+    ,WorkDate
 FROM dbo.mtfn_BatchesWithHangingDates(@SpecifiedYear)
     WHERE WorkDate >= @Jan1DT
     AND WorkDate <= @Dec31DT
